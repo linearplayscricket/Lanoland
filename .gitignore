@@ -1,129 +1,244 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+from tkinter import *
+import os
+from tkinter import filedialog
+from tkinter import font
+from tkinter import messagebox
+import time
 
-# C extensions
-*.so
+root = Tk()
+root.title('untitled - lanoland')
+root.geometry('1200x660')
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+global selected
+selected = False
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+def exitroot():
+        if messagebox.askyesno("Save?", "do you want to save before exiting"):
+            savefile()
+            root.destroy()
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+        else:
+            root.destroy()
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
 
-# Translations
-*.mo
-*.pot
+def new_file():
+    if len(my_text.get("1.0", END+"-1c")) > 0:
+        if messagebox.askyesno("Save?", "would you like to save?"):
+            save_file()
+            my_text.delete("1.0", END)
+            status_bar.config(text="New File                 ")
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+        else:
+            my_text.delete("1.0", END)
+            status_bar.config(text="New File                 ")
 
-# Flask stuff:
-instance/
-.webassets-cache
 
-# Scrapy stuff:
-.scrapy
+def focusup(e):
+        my_text.config(font=('Calibri', 16))
 
-# Sphinx documentation
-docs/_build/
 
-# PyBuilder
-target/
+def focus():
+        my_text.config(font=('Calibri', 16))
 
-# Jupyter Notebook
-.ipynb_checkpoints
 
-# IPython
-profile_default/
-ipython_config.py
+def unfocus():
+        my_text.config(font=('Calibri', 12))
 
-# pyenv
-.python-version
 
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
+def unfocusup(e):
+        my_text.config(font=('Calibri', 12))
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
+def open_file():
+    my_text.delete("1.0", END)
+    file = filedialog.askopenfile(parent=root, title="select a text file", filetypes=(("Text file", "*.txt"), ("All files", "*.*")))
 
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
+    root.title(os.path.basename(file.name) + " - lanoland")
 
-# SageMath parsed files
-*.sage.py
+    if file != None:
+        contents = file.read()
+        my_text.insert("1.0", contents)
+        file.close()
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
 
-# Spyder project settings
-.spyderproject
-.spyproject
+def cut_text(e):
+        global selected
+        if e:
+                selected = root.clipboard_get()
+        else:        
+                if my_text.selection_get():
+                        selected = my_text.selection_get()
+                        my_text.delete("sel.first", "sel.last")
+                        root.clipboard_clear()
+                        root.clipboard_append(selected)
 
-# Rope project settings
-.ropeproject
 
-# mkdocs documentation
-/site
+def copy_text(e):
+        global selected
+        if e:
+                selected = root.clipboard_get()
+                
+        if my_text.selection_get():
+                selected = my_text.selection_get()
+                root.clipboard_clear()
+                root.clipboard_append(selected)
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
 
-# Pyre type checker
-.pyre/
+def paste_text(e):
+        global selected
+        if e:
+                selected =  root.clipboard_get()
+        else:        
+                if selected:
+                        position = my_text.index(INSERT)
+                        my_text.insert(position, selected)
+
+
+def tnr():
+    my_text.config(font=("times new roman", 12))
+
+
+def save_as_file():
+    file = filedialog.asksaveasfile(mode="w")
+    status_bar.config(text="Saving.....      ")
+
+    root.title(os.path.basename(file.name) + " - lanoland")
+    status_bar.config(text=(os.path.basename(file.name) + ".txt              "))
+
+    if file != None:
+        data = my_text.get("1.0", END+"-1c")
+        file.write(data)
+        file.close()        
+
+
+def kbsc():
+        messagebox.showinfo("Shortcuts", "ctrl+c = Copy Text\nctrl+v = Paste Text\nctrl+x = Cut Text\nctrl+f = Focus Mode\nctrl+g = Exit Foucus Mode\nctrl+t = Clear All\nctrl+s = Save File") 
+
+
+def clbri():
+    my_text.config(font=("calibri", 12))
+
+
+
+def dark_mode(e):
+    my_text.config(bg="black", fg="white")
+    my_text.configure(insertbackground="white")
+
+
+def light_mode(e):
+    my_text.config(bg="white", fg="black")
+    my_text.configure(insertbackground="black")
+
+
+def bold_it():
+    bold_font = font.Font(my_text, my_text.cget("font"))
+    bold_font.configure(weight="bold")
+
+    my_text.tag_configure("bold", font=bold_font)
+
+    current_tags = my_text.tag_names("sel.first")
+
+    if "bold" in current_tags:
+        my_text.tag_remove("bold", "sel.first", "sel.last")
+    else:
+        my_text.tag_add("bold", "sel.first", "sel.last")
+
+    
+def italics_it():
+    italics_font = font.Font(my_text, my_text.cget("font"))
+    italics_font.configure(slant="italic")
+
+    my_text.tag_configure("italic", font=italics_font)
+
+    current_tags = my_text.tag_names("sel.first")
+
+    if "italic" in current_tags:
+        my_text.tag_remove("italic", "sel.first", "sel.last")
+    else:
+        my_text.tag_add("italic", "sel.first", "sel.last")
+
+
+def select_all():
+    my_text.tag_add("sel", "1.0", END)
+
+
+def clear_all(e):
+    my_text.delete("1.0", END)
+
+
+def clear_txt():
+    my_text.delete("1.0", END)
+
+
+def about():
+    messagebox.showinfo("About Lanoland!", "Lanoland is a text editor as you may well have guessed however its backstory is quite interesing. One day at school I was tasked to create something for what we called our Product Inquiry. I was given a term to make something that would teach me a new skill. It was this day that Lanoland was born. From there I worked rigourously and after a good 7 weeks Lanoland was complete. I am hugely proud of this and I am very glad that I had the opportunity to do such a thing.")
+
+
+toolbar_frame = Frame(root)
+toolbar_frame.pack(fill=X)
+
+my_frame = Frame(root)
+my_frame.pack(pady=2)
+
+text_scroll = Scrollbar(my_frame)
+text_scroll.pack(side=RIGHT, fill=Y)
+
+my_text = Text(my_frame, width=150, height=33, font=('Calibri', 12), selectforeground="black", undo=True, yscrollcommand=text_scroll.set, wrap="word")
+my_text.pack()
+
+text_scroll.config(command=my_text.yview)
+
+my_menu = Menu(root)
+root.config(menu=my_menu)
+
+file_menu = Menu(my_menu, tearoff=False)
+my_menu.add_cascade(label="File", menu=file_menu)
+file_menu.add_command(label="New", command=new_file)
+file_menu.add_command(label="Open", command=open_file)
+file_menu.add_command(label="Save File", command=save_as_file)
+file_menu.add_separator()
+file_menu.add_command(label="Exit", command=exitroot)
+
+edit_menu = Menu(my_menu, tearoff=False)
+my_menu.add_cascade(label="Edit", menu=edit_menu)
+edit_menu.add_command(label="Cut", command=lambda: cut_text(False), accelerator="(Ctrl+x)")
+edit_menu.add_command(label="Copy", command=lambda: copy_text(False), accelerator="(Ctrl+c)")
+edit_menu.add_command(label="Paste", command=lambda: paste_text(False), accelerator="(Ctrl+v)")
+edit_menu.add_separator()
+edit_menu.add_command(label="Undo", command=my_text.edit_undo, accelerator="(Ctrl+z)")
+edit_menu.add_command(label="Redo", command=my_text.edit_redo, accelerator="(Ctrl+y)")
+edit_menu.add_separator()
+edit_menu.add_command(label="Select All", command=select_all, accelerator="(Ctrl+a)")
+edit_menu.add_command(label="Clear", command=clear_txt, accelerator="(Ctrl+t)")
+
+appearance_menu = Menu(my_menu, tearoff=False)
+my_menu.add_cascade(label="Appearance", menu=appearance_menu)
+appearance_menu.add_command(label="Focus Mode", command=focus, accelerator="(Ctrl+f)")
+appearance_menu.add_command(label="Exit Focus Mode", command=unfocus, accelerator="(Ctrl+s)")
+appearance_menu.add_separator()
+appearance_menu.add_command(label="Light Mode", command=unfocus, accelerator="(Ctrl+l)")
+appearance_menu.add_command(label="Dark Mode", command=unfocus, accelerator="(Ctrl+d)")
+
+help_menu = Menu(my_menu, tearoff=False)
+my_menu.add_cascade(label="Help", menu=help_menu)
+help_menu.add_command(label="Shortcuts", command=kbsc)
+help_menu.add_command(label="About", command=about)
+
+status_bar = Label(root, text='Ready   ', anchor=E)
+status_bar.pack(fill=X, side=BOTTOM, ipady=5)
+
+bold_button = Button(toolbar_frame, text="Bold", command=bold_it)
+bold_button.grid(row=0, column=10, padx=7, pady=2)
+
+italics_button = Button(toolbar_frame, text="Italics", command=italics_it)
+italics_button.grid(row=0, column=11, padx=7, pady=2)
+
+root.bind('<Control-Key-x>', cut_text)
+root.bind('<Control-Key-c>', copy_text)
+root.bind('<Control-Key-v>', paste_text)
+root.bind('<Control-Key-f>', focusup)
+root.bind('<Control-Key-g>', unfocusup)
+root.bind('<Control-Key-l>', light_mode)
+root.bind('<Control-Key-d>', dark_mode)
+root.bind('<Control-Key-t>', clear_all)
+
+root.mainloop()
